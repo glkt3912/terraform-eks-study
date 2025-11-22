@@ -1,0 +1,25 @@
+# =============================================================================
+# Terraform Variables Example
+# =============================================================================
+# Copy this file to terraform.tfvars and customize the values
+# cp terraform.tfvars.example terraform.tfvars
+
+# AWS Region
+aws_region = "ap-northeast-1"
+
+# Project name (used for resource naming)
+project_name = "terraform-basics"
+
+# VPC CIDR block
+vpc_cidr = "10.0.0.0/16"
+
+# Public subnet CIDR block
+public_subnet_cidr = "10.0.1.0/24"
+
+# EC2 instance type (t2.micro is free tier eligible)
+instance_type = "t2.micro"
+
+# CIDR block allowed for SSH access
+# IMPORTANT: In production, restrict this to your IP address
+# Example: "203.0.113.0/32" for a single IP
+allowed_ssh_cidr = "0.0.0.0/0"
