@@ -3,7 +3,7 @@
 # =============================================================================
 # To enable remote state:
 # 1. First, apply backend/ to create S3 bucket and DynamoDB table
-# 2. Rename this file: mv backend.tf.example backend.tf
+# 2. Copy this file: cp backend.tf.example backend.tf
 # 3. Update bucket name below with your actual bucket name
 # 4. Run: terraform init -migrate-state
 
