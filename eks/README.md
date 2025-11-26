@@ -186,7 +186,27 @@ module "eks" {
 
 ## Next Steps
 
-1. **アプリデプロイ**: `manifests/` にサンプルアプリを配置
-2. **Ingress 設定**: AWS Load Balancer Controller のインストール
-3. **監視**: CloudWatch Container Insights / Prometheus
-4. **CI/CD**: ArgoCD / Flux でGitOps
+### 1. アプリケーションデプロイ
+
+クラスターをデプロイ後、`manifests/` ディレクトリのサンプルアプリケーションを使用して動作確認できます。
+
+```bash
+# kubeconfigを設定
+aws eks update-kubeconfig --region ap-northeast-1 --name eks-study-cluster
+
+# Nginxサンプルをデプロイ
+kubectl apply -f manifests/nginx-deployment.yaml
+
+# 動作確認
+kubectl get pods
+kubectl get svc
+```
+
+詳細は [manifests/README.md](./manifests/README.md) を参照してください。
+
+### 2. その他の拡張機能
+
+- **Ingress 設定**: AWS Load Balancer Controller のインストール
+- **監視**: CloudWatch Container Insights / Prometheus
+- **CI/CD**: ArgoCD / Flux でGitOps
+- **オートスケール**: Horizontal Pod Autoscaler (HPA) / Cluster Autoscaler
