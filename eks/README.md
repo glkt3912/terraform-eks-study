@@ -83,7 +83,7 @@ module "vpc" {
 |------|------|--------|
 | Public + Private endpoint | kubectl アクセス + VPC 内通信 | Private only（VPN必須） |
 | CloudWatch Logs (api, audit, auth) | 監査・トラブルシュート | 全ログ or 無効化 |
-| Kubernetes 1.31 | 最新安定版 | LTS バージョン |
+| Kubernetes 1.32 | 標準サポート最新版 | 旧バージョン (1.31以下) |
 
 **モジュール代替:**
 

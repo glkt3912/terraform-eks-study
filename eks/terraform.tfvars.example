@@ -19,13 +19,13 @@ vpc_cidr = "10.0.0.0/16"
 # EKS Cluster
 # -----------------------------------------------------------------------------
 cluster_name       = "eks-study-cluster"
-kubernetes_version = "1.31"
+kubernetes_version = "1.32"
 
 # -----------------------------------------------------------------------------
 # Node Group
 # -----------------------------------------------------------------------------
-node_instance_types = ["t3.medium"]
+node_instance_types = ["t3.small"]  # t3.small is free-tier eligible
 node_capacity_type  = "ON_DEMAND" # or "SPOT" for cost savings
 node_min_size       = 1
-node_max_size       = 3
-node_desired_size   = 2
+node_max_size       = 2
+node_desired_size   = 1

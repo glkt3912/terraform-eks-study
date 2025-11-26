@@ -104,3 +104,4 @@ Thumbs.db
 .env.*
 *.env
 secrets/
+apply.log
