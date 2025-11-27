@@ -42,6 +42,10 @@ override.tf.json
 .terraformrc
 terraform.rc
 
+# Plan files (may contain sensitive data)
+*.tfplan
+tfplan
+
 # Lock file (include in repo for reproducibility - uncomment if you want to ignore)
 # .terraform.lock.hcl
 
@@ -100,3 +104,4 @@ Thumbs.db
 .env.*
 *.env
 secrets/
+apply.log
