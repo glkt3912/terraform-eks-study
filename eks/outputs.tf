@@ -96,3 +96,17 @@ output "alb_controller_role_arn" {
   description = "ARN of IAM role for AWS Load Balancer Controller"
   value       = aws_iam_role.alb_controller.arn
 }
+
+# -----------------------------------------------------------------------------
+# IRSA Outputs
+# -----------------------------------------------------------------------------
+
+output "irsa_s3_role_arn" {
+  description = "ARN of IAM role for S3 read-only access (IRSA example)"
+  value       = aws_iam_role.pod_s3_readonly.arn
+}
+
+output "irsa_test_bucket_name" {
+  description = "Name of S3 bucket for IRSA testing"
+  value       = aws_s3_bucket.irsa_test.id
+}
