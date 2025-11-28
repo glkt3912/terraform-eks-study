@@ -1,0 +1,105 @@
+# =============================================================================
+# Ingress Configuration for nginx
+# =============================================================================
+# Creates an Application Load Balancer (ALB) to route HTTP traffic to nginx
+#
+# Prerequisites:
+# - AWS Load Balancer Controller installed
+# - nginx-service exists (from manifests/nginx-deployment.yaml)
+#
+# The controller automatically:
+# - Creates ALB with Target Groups
+# - Configures health checks
+# - Manages security groups
+# - Routes traffic based on path rules
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nginx-ingress
+  namespace: default
+  annotations:
+    # Use AWS Load Balancer Controller
+    kubernetes.io/ingress.class: alb
+
+    # ALB configuration
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+
+    # Health check settings
+    alb.ingress.kubernetes.io/healthcheck-path: /
+    alb.ingress.kubernetes.io/healthcheck-interval-seconds: "15"
+    alb.ingress.kubernetes.io/healthcheck-timeout-seconds: "5"
+    alb.ingress.kubernetes.io/healthy-threshold-count: "2"
+    alb.ingress.kubernetes.io/unhealthy-threshold-count: "2"
+
+    # Listen on port 80 (HTTP only for this example)
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}]'
+
+    # Specify subnets (use public subnets for internet-facing)
+    # Note: Controller auto-discovers subnets with tags:
+    # - kubernetes.io/role/elb = 1 (for public)
+    # - kubernetes.io/cluster/<cluster-name> = shared|owned
+
+    # Optional: Enable access logs
+    # alb.ingress.kubernetes.io/load-balancer-attributes: access_logs.s3.enabled=true,access_logs.s3.bucket=<bucket-name>
+
+    # Optional: Add tags to ALB
+    alb.ingress.kubernetes.io/tags: Environment=study,ManagedBy=kubernetes
+
+spec:
+  rules:
+  # Default rule: Route all traffic to nginx service
+  - http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: nginx-service
+            port:
+              number: 80
+
+---
+# =============================================================================
+# Ingress with Multiple Paths (Example)
+# =============================================================================
+# Commented out: Demonstrates routing different paths to different services
+
+# apiVersion: networking.k8s.io/v1
+# kind: Ingress
+# metadata:
+#   name: multi-path-ingress
+#   namespace: default
+#   annotations:
+#     kubernetes.io/ingress.class: alb
+#     alb.ingress.kubernetes.io/scheme: internet-facing
+#     alb.ingress.kubernetes.io/target-type: ip
+# spec:
+#   rules:
+#   - http:
+#       paths:
+#       # Route /api/* to api-service
+#       - path: /api
+#         pathType: Prefix
+#         backend:
+#           service:
+#             name: api-service
+#             port:
+#               number: 8080
+#       # Route /web/* to web-service
+#       - path: /web
+#         pathType: Prefix
+#         backend:
+#           service:
+#             name: web-service
+#             port:
+#               number: 80
+#       # Default route to nginx
+#       - path: /
+#         pathType: Prefix
+#         backend:
+#           service:
+#             name: nginx-service
+#             port:
+#               number: 80
