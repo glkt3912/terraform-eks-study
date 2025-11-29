@@ -1,0 +1,136 @@
+# =============================================================================
+# Pod with IRSA
+# =============================================================================
+# Demonstrates Pod using IRSA to access S3
+#
+# This Pod uses the s3-readonly-sa ServiceAccount and can therefore
+# access the S3 bucket created by Terraform.
+#
+# Prerequisites:
+# 1. ServiceAccount created with correct IAM role annotation
+# 2. S3 bucket created by Terraform
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: irsa-demo
+  namespace: default
+  labels:
+    app: irsa-demo
+spec:
+  serviceAccountName: s3-readonly-sa  # Use IRSA-enabled ServiceAccount
+
+  containers:
+  - name: aws-cli
+    image: amazon/aws-cli:2.15.10
+    command:
+    - /bin/sh
+    - -c
+    - |
+      echo "========================================="
+      echo "IRSA Demo: Testing S3 Access"
+      echo "========================================="
+      echo ""
+
+      # Display AWS identity
+      echo "1. Checking AWS Identity:"
+      aws sts get-caller-identity
+      echo ""
+
+      # Get bucket name from environment or use placeholder
+      BUCKET_NAME="${S3_BUCKET_NAME}"
+
+      if [ -z "$BUCKET_NAME" ]; then
+        echo "ERROR: S3_BUCKET_NAME environment variable not set"
+        echo "Please update the Pod manifest with the bucket name"
+        exit 1
+      fi
+
+      # List S3 buckets (should succeed)
+      echo "2. Listing objects in bucket: $BUCKET_NAME"
+      aws s3 ls s3://$BUCKET_NAME/ || echo "Failed to list bucket"
+      echo ""
+
+      # Read test file
+      echo "3. Reading test.txt from S3:"
+      aws s3 cp s3://$BUCKET_NAME/test.txt - || echo "Failed to read file"
+      echo ""
+
+      # Try to write (should fail due to read-only policy)
+      echo "4. Attempting to write (should fail):"
+      echo "This should fail" | aws s3 cp - s3://$BUCKET_NAME/write-test.txt 2>&1 || echo "Write denied (expected)"
+      echo ""
+
+      echo "========================================="
+      echo "IRSA Demo Complete"
+      echo "========================================="
+
+      # Keep container running for inspection
+      echo "Container will stay running. Use 'kubectl logs irsa-demo' to see output."
+      sleep infinity
+
+    env:
+    # IMPORTANT: Replace with actual bucket name from terraform output
+    # Get bucket name: terraform -chdir=eks output -raw irsa_test_bucket_name
+    - name: S3_BUCKET_NAME
+      value: "PROJECT_NAME-irsa-test-XXXXXXXX"
+
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi
+
+  restartPolicy: Always
+
+---
+# =============================================================================
+# Pod WITHOUT IRSA (For Comparison)
+# =============================================================================
+# This Pod does NOT use the IRSA ServiceAccount and will fail to access S3
+# Commented out by default
+
+# apiVersion: v1
+# kind: Pod
+# metadata:
+#   name: no-irsa-demo
+#   namespace: default
+#   labels:
+#     app: no-irsa-demo
+# spec:
+#   # Uses default ServiceAccount (no IAM permissions)
+#   # serviceAccountName: default
+#
+#   containers:
+#   - name: aws-cli
+#     image: amazon/aws-cli:2.15.10
+#     command:
+#     - /bin/sh
+#     - -c
+#     - |
+#       echo "========================================="
+#       echo "No IRSA: This should FAIL"
+#       echo "========================================="
+#       echo ""
+#
+#       # This should fail (no IAM role)
+#       aws sts get-caller-identity 2>&1 || echo "No credentials (expected)"
+#       echo ""
+#
+#       aws s3 ls 2>&1 || echo "Access denied (expected)"
+#       echo ""
+#
+#       echo "Container will stay running for inspection."
+#       sleep infinity
+#
+#     resources:
+#       requests:
+#         cpu: 100m
+#         memory: 128Mi
+#       limits:
+#         cpu: 200m
+#         memory: 256Mi
+#
+#   restartPolicy: Always

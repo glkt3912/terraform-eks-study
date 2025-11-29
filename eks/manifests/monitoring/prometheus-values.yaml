@@ -1,0 +1,178 @@
+# =============================================================================
+# Prometheus Stack Helm Values
+# =============================================================================
+# Custom values for kube-prometheus-stack Helm chart
+#
+# Installation:
+# helm install prometheus prometheus-community/kube-prometheus-stack \
+#   --namespace monitoring --create-namespace -f prometheus-values.yaml
+#
+# This configuration is optimized for learning/development environments
+
+# -----------------------------------------------------------------------------
+# Prometheus Configuration
+# -----------------------------------------------------------------------------
+prometheus:
+  prometheusSpec:
+    # Storage retention
+    retention: 7d
+    retentionSize: "5GB"
+
+    # Resource limits (adjust for production)
+    resources:
+      requests:
+        cpu: 200m
+        memory: 512Mi
+      limits:
+        cpu: 500m
+        memory: 1Gi
+
+    # Storage (optional: use for persistent storage)
+    # Uncomment to enable persistent volume
+    # storageSpec:
+    #   volumeClaimTemplate:
+    #     spec:
+    #       accessModes: ["ReadWriteOnce"]
+    #       resources:
+    #         requests:
+    #           storage: 10Gi
+
+    # Service monitors to scrape
+    serviceMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false
+
+  # Service type for Prometheus (ClusterIP by default)
+  # Change to LoadBalancer for external access
+  service:
+    type: ClusterIP
+    # type: LoadBalancer  # Uncomment for external access
+
+# -----------------------------------------------------------------------------
+# Grafana Configuration
+# -----------------------------------------------------------------------------
+grafana:
+  # Admin credentials (CHANGE IN PRODUCTION!)
+  adminPassword: admin
+
+  # Service type - LoadBalancer for external access
+  service:
+    type: LoadBalancer
+    annotations:
+      # Optional: Use internal load balancer
+      # service.beta.kubernetes.io/aws-load-balancer-internal: "true"
+
+  # Resource limits
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 200m
+      memory: 512Mi
+
+  # Persistence (optional)
+  # Uncomment to enable persistent storage
+  # persistence:
+  #   enabled: true
+  #   size: 5Gi
+
+  # Pre-configured dashboards
+  dashboardProviders:
+    dashboardproviders.yaml:
+      apiVersion: 1
+      providers:
+      - name: 'default'
+        orgId: 1
+        folder: ''
+        type: file
+        disableDeletion: false
+        editable: true
+        options:
+          path: /var/lib/grafana/dashboards/default
+
+  # Additional dashboards (optional)
+  # dashboards:
+  #   default:
+  #     # Kubernetes cluster monitoring dashboard
+  #     kubernetes-cluster:
+  #       gnetId: 7249
+  #       revision: 1
+  #       datasource: Prometheus
+
+# -----------------------------------------------------------------------------
+# Alertmanager Configuration
+# -----------------------------------------------------------------------------
+# Disabled to reduce pod count for t3.small node capacity
+alertmanager:
+  enabled: false
+
+  alertmanagerSpec:
+    # Resource limits
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        cpu: 100m
+        memory: 256Mi
+
+  # Service type
+  service:
+    type: ClusterIP
+
+# -----------------------------------------------------------------------------
+# Node Exporter (collects node-level metrics)
+# -----------------------------------------------------------------------------
+nodeExporter:
+  enabled: true
+
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
+
+# -----------------------------------------------------------------------------
+# Kube State Metrics (collects Kubernetes object metrics)
+# -----------------------------------------------------------------------------
+kube-state-metrics:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 100m
+      memory: 256Mi
+
+# -----------------------------------------------------------------------------
+# Prometheus Operator
+# -----------------------------------------------------------------------------
+prometheusOperator:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+
+# -----------------------------------------------------------------------------
+# Additional Scrape Configurations
+# -----------------------------------------------------------------------------
+# Uncomment to add custom scrape configs
+# prometheus:
+#   prometheusSpec:
+#     additionalScrapeConfigs:
+#     - job_name: 'custom-app'
+#       static_configs:
+#       - targets: ['custom-app-service:8080']
+
+# -----------------------------------------------------------------------------
+# Service Monitors (auto-discovery of services to monitor)
+# -----------------------------------------------------------------------------
+# The stack will automatically discover services with these annotations:
+# prometheus.io/scrape: "true"
+# prometheus.io/port: "8080"
+# prometheus.io/path: "/metrics"
