@@ -25,6 +25,14 @@ terraform {
       source  = "hashicorp/random"
       version = "~> 3.0"
     }
+    helm = {
+      source  = "hashicorp/helm"
+      version = "~> 2.12"
+    }
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "~> 2.25"
+    }
   }
 }
 
@@ -37,6 +45,36 @@ provider "aws" {
       Environment = "study"
       ManagedBy   = "terraform"
     }
+  }
+}
+
+# -----------------------------------------------------------------------------
+# Data Source for EKS Authentication
+# -----------------------------------------------------------------------------
+
+data "aws_eks_cluster_auth" "main" {
+  name = aws_eks_cluster.main.name
+}
+
+# -----------------------------------------------------------------------------
+# Kubernetes Provider
+# -----------------------------------------------------------------------------
+
+provider "kubernetes" {
+  host                   = aws_eks_cluster.main.endpoint
+  cluster_ca_certificate = base64decode(aws_eks_cluster.main.certificate_authority[0].data)
+  token                  = data.aws_eks_cluster_auth.main.token
+}
+
+# -----------------------------------------------------------------------------
+# Helm Provider
+# -----------------------------------------------------------------------------
+
+provider "helm" {
+  kubernetes {
+    host                   = aws_eks_cluster.main.endpoint
+    cluster_ca_certificate = base64decode(aws_eks_cluster.main.certificate_authority[0].data)
+    token                  = data.aws_eks_cluster_auth.main.token
   }
 }
 
