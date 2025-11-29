@@ -102,8 +102,9 @@ grafana:
 # -----------------------------------------------------------------------------
 # Alertmanager Configuration
 # -----------------------------------------------------------------------------
+# Disabled to reduce pod count for t3.small node capacity
 alertmanager:
-  enabled: true
+  enabled: false
 
   alertmanagerSpec:
     # Resource limits
