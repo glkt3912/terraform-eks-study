@@ -110,3 +110,54 @@ output "irsa_test_bucket_name" {
   description = "Name of S3 bucket for IRSA testing"
   value       = aws_s3_bucket.irsa_test.id
 }
+
+# -----------------------------------------------------------------------------
+# ArgoCD Outputs
+# -----------------------------------------------------------------------------
+
+output "argocd_namespace" {
+  description = "Namespace where ArgoCD is installed"
+  value       = kubernetes_namespace.argocd.metadata[0].name
+}
+
+output "argocd_role_arn" {
+  description = "ARN of IAM role for ArgoCD (IRSA)"
+  value       = aws_iam_role.argocd.arn
+}
+
+output "argocd_server_url" {
+  description = "URL to access ArgoCD server (LoadBalancer DNS)"
+  value       = try(kubernetes_ingress_v1.argocd.status[0].load_balancer[0].ingress[0].hostname, "Pending...")
+}
+
+output "argocd_admin_password" {
+  description = "Initial admin password for ArgoCD"
+  value       = try(data.kubernetes_secret.argocd_initial_admin_secret.data["password"], "Not yet available")
+  sensitive   = true
+}
+
+output "argocd_access_instructions" {
+  description = "Instructions to access ArgoCD"
+  value       = <<-EOT
+    ArgoCD Access Instructions:
+
+    1. Get the LoadBalancer URL:
+       terraform output argocd_server_url
+
+    2. Get the admin password:
+       terraform output -raw argocd_admin_password
+
+       Or directly from Kubernetes:
+       kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+
+    3. Access ArgoCD UI:
+       Open browser: http://<LoadBalancer-URL>
+       Username: admin
+       Password: <from step 2>
+
+    4. CLI Login:
+       argocd login <LoadBalancer-URL> --username admin --password <password>
+
+    Note: Change the initial password after first login.
+  EOT
+}
