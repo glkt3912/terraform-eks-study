@@ -10,7 +10,7 @@ spec:
   # Gitリポジトリ情報
   source:
     repoURL: https://github.com/glkt3912/terraform-eks-study.git
-    targetRevision: HEAD
+    targetRevision: feat/argocd-nginx-migration
     path: eks/manifests/nginx
 
   # デプロイ先
