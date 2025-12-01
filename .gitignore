@@ -21,6 +21,9 @@ docs/
 *.tfstate
 *.tfstate.*
 
+# Backup files
+backup/
+
 # Crash log files
 crash.log
 crash.*.log
