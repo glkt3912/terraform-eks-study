@@ -1,11 +1,13 @@
-name: CI/CD Pipeline
+name: CI/CD Pipeline (DISABLED)
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'app/**'
+  # Push trigger disabled during EKS cleanup period
+  # Re-enable after restoring cluster (see RESTORE.md)
+  # push:
+  #   branches:
+  #     - main
+  #   paths:
+  #     - 'app/**'
   workflow_dispatch:
 
 env:
