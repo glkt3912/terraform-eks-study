@@ -37,7 +37,7 @@ func handleRoot(w http.ResponseWriter, r *http.Request) {
 <!DOCTYPE html>
 <html>
 <head>
-    <title>CI/CD Demo App</title>
+    <title>CI/CD Demo App - EKS Study</title>
     <style>
         body {
             font-family: Arial, sans-serif;
