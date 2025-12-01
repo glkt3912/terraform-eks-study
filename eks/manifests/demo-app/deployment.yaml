@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: demo-app
-        image: 070279951878.dkr.ecr.ap-northeast-1.amazonaws.com/eks-study-demo-app:6d04668455a9a7edf93937403561453a19873422
+        image: 070279951878.dkr.ecr.ap-northeast-1.amazonaws.com/eks-study-demo-app:6f9cbea9f8cbe05fdf4d977df5f944564b00b55e
         ports:
         - containerPort: 8080
         env:
